@@ -29,4 +29,13 @@ export class UsersService {
     }
     this.repo.remove(user);
   }
+
+  async update(id: number, attributes: Partial<User>) {
+    const user = await this.findOne(id);
+    if (!user) {
+      return new Error('No user found');
+    }
+    Object.assign(user, attributes);
+    return this.repo.save(user);
+  }
 }
