@@ -7,3 +7,7 @@ Content-Type: application/json
   "email": "abcd@email.com",
   "password": "mkcvfkv"
 }
+
+### Find a particular user with a given ID
+
+GET http://localhost:3000/auth/1
