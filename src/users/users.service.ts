@@ -22,5 +22,11 @@ export class UsersService {
     return this.repo.find({ email });
   }
 
-  
+  async remove(id: number) {
+    const user = await this.findOne(id);
+    if (!user) {
+      return new Error('No user found');
+    }
+    this.repo.remove(user);
+  }
 }
