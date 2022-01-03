@@ -9,10 +9,21 @@ describe('AuthService', () => {
   let fakeUsersService: Partial<UsersService>;
 
   beforeEach(async () => {
+    const users: User[] = [];
     fakeUsersService = {
-      find: () => Promise.resolve([]),
-      create: (email: string, password: string) =>
-        Promise.resolve({ id: 1, email, password } as User),
+      find: (email: string) => {
+        const filteredUsers = users.filter(user => user.email === email);
+        return Promise.resolve(filteredUsers);
+      },
+      create: (email: string, password: string) => {
+        const user = {
+          id: Math.floor(Math.random() * 999999),
+          email,
+          password,
+        } as User;
+        users.push(user);
+        return Promise.resolve(user);
+      }
     }
 
     const module = await Test.createTestingModule({
@@ -42,9 +53,7 @@ describe('AuthService', () => {
   });
 
   it('should throw an error if a user signup with an existant email', async () => {
-    fakeUsersService.find = () => Promise.resolve([
-      { email: 'a@a.com', password: 'a' } as User
-    ]);
+    await service.signup('a@a.com', 'v');
 
     try {
       await service.signup('a@a.com', 'b');
@@ -62,9 +71,7 @@ describe('AuthService', () => {
   });
 
   it('should throw an error if password is incorrect', async () => {
-    fakeUsersService.find = () => Promise.resolve([
-      { email: 'test@test.com', password: '12f45657c0b2f698.04623b120858e533c12c5496286cfe9202db33f171f8151b96977915b013b05c' } as User
-    ]);
+    await service.signup('anything@b.com', 'mypassword');    
 
     try {
       await service.signin('anything@b.com', 'mypasswor');
@@ -73,14 +80,10 @@ describe('AuthService', () => {
     }
   });
 
-  it('should create a user password is correct', async () => {
-    // const user = await service.signup('asdf@asdf.com', 'mypassword');
-    // console.log(user);
-    fakeUsersService.find = () => Promise.resolve([
-      { email: 'test@test.com', password: '12f45657c0b2f698.04623b120858e533c12c5496286cfe9202db33f171f8151b96977915b013b05c' } as User
-    ]);
+  it('should create a user if password is correct', async () => {
+    await service.signup('asdf@asdf.com', 'mypassword');
       
-    const user =await service.signin('test@test.com', 'mypassword');
+    const user = await service.signin('asdf@asdf.com', 'mypassword');
     expect(user).toBeDefined()
   });
 });
